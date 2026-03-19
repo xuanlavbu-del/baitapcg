@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Quạt 3 cánh</title>
+
+    <style>
+
+        body{
+            text-align:center;
+            margin-top:50px;
+        }
+
+        /* đầu quạt */
+        .fan{
+            width:220px;
+            height:220px;
+            border:5px solid black;
+            border-radius:50%;
+            margin:auto;
+            position:relative;
+        }
+
+        /* khối chứa cánh quạt */
+        .blades{
+            width:100%;
+            height:100%;
+            position:absolute;
+        }
+
+        /* cánh quạt */
+        .blade{
+            width:80px;
+            height:25px;
+            background:red;
+            position:absolute;
+            top:95px;
+            left:70px;
+            transform-origin:40px 12px;
+        }
+
+        .b1{ transform:rotate(0deg); }
+        .b2{ transform:rotate(120deg); }
+        .b3{ transform:rotate(240deg); }
+
+        /* quay */
+        @keyframes spin{
+            from{ transform:rotate(0deg); }
+            to{ transform:rotate(360deg); }
+        }
+
+        /* chân quạt */
+        .stand{
+            width:10px;
+            height:150px;
+            background:black;
+            margin:auto;
+        }
+
+        .base{
+            width:120px;
+            height:20px;
+            background:black;
+            margin:auto;
+            border-radius:10px;
+        }
+
+        button{
+            padding:10px 20px;
+            margin:10px;
+            font-size:16px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<h2>Quạt điện 3 cánh</h2>
+
+<div class="fan">
+
+    <div class="blades" id="blades">
+
+        <div class="blade b1"></div>
+        <div class="blade b2"></div>
+        <div class="blade b3"></div>
+
+    </div>
+
+</div>
+
+<div class="stand"></div>
+<div class="base"></div>
+
+<br>
+
+<button onclick="batTat()">Bật / Tắt</button>
+<button onclick="tangToc()">Tăng tốc</button>
+<button onclick="giamToc()">Giảm tốc</button>
+<script>
+
+    let fan = document.getElementById("blades");
+    let speed = 2;
+    let running = false;
+
+    function batTat(){
+
+        if(running){
+            fan.style.animation="none";
+        }
+        else{
+            fan.style.animation="spin "+speed+"s linear infinite";
+        }
+
+        running=!running;
+
+    }
+
+    function tangToc(){
+
+        if(speed>0.5){
+            speed = speed - 0.5;
+        }
+
+        if(running){
+            fan.style.animation="spin "+speed+"s linear infinite";
+        }
+
+    }
+    function giamToc(){
+
+        if(speed>0.5){
+            speed = speed + 0.5;
+        }
+
+        if(running){
+            fan.style.animation="spin "+speed+"s linear infinite";
+        }
+
+    }
+</script>
+
+</body>
+</html>
