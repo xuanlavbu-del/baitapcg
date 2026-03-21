@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Puzzle Ảnh</title>
+
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial;
+            background: #f0f0f0;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .board {
+            width: 360px;
+            height: 360px;
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3px;
+        }
+
+        .piece {
+            width: 120px;
+            height: 120px;
+            background-image: url("https://picsum.photos/360");
+            background-size: 360px 360px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .piece:hover {
+            transform: scale(1.05);
+        }
+
+        .selected {
+            outline: 4px solid red;
+        }
+
+        .win {
+            display: none;
+            font-size: 40px;
+            color: red;
+            margin-top: 20px;
+            animation: pop 0.5s;
+        }
+
+        @keyframes pop {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+    </style>
+
+</head>
+<body>
+
+<h1>🧩 Puzzle Ảnh</h1>
+
+<div class="board" id="board"></div>
+
+<div class="win" id="winBox">🎉 Hoàn thành!</div>
+
+<script>
+    const board = document.getElementById("board");
+    const winBox = document.getElementById("winBox");
+
+    let pieces = [];
+    let selected = null;
+
+    // tạo mảng đúng
+    const correct = [...Array(9).keys()];
+
+    // trộn mảng
+    function shuffle(arr) {
+        return arr.sort(() => Math.random() - 0.5);
+    }
+
+    function createBoard() {
+        board.innerHTML = "";
+        pieces = shuffle([...correct]);
+
+        pieces.forEach((value, index) => {
+            const div = document.createElement("div");
+            div.className = "piece";
+
+            let x = (value % 3) * 120;
+            let y = Math.floor(value / 3) * 120;
+
+            div.style.backgroundPosition = `-${x}px -${y}px`;
+
+            div.onclick = () => selectPiece(index, div);
+
+            board.appendChild(div);
+        });
+    }
+
+    function selectPiece(index, element) {
+        if (selected === null) {
+            selected = index;
+            element.classList.add("selected");
+        } else {
+            swap(selected, index);
+            selected = null;
+            render();
+            checkWin();
+        }
+    }
+
+    function swap(i, j) {
+        [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
+    }
+
+    function render() {
+        const divs = document.querySelectorAll(".piece");
+
+        divs.forEach((div, index) => {
+            div.classList.remove("selected");
+
+            let value = pieces[index];
+            let x = (value % 3) * 120;
+            let y = Math.floor(value / 3) * 120;
+
+            div.style.backgroundPosition = `-${x}px -${y}px`;
+        });
+    }
+
+    function checkWin() {
+        let win = pieces.every((v, i) => v === correct[i]);
+
+        if (win) {
+            winBox.style.display = "block";
+
+            setTimeout(() => {
+                winBox.style.display = "none";
+                createBoard();
+            }, 2000);
+        }
+    }
+
+    createBoard();
+</script>
+
+</body>
+</html>
