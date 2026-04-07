@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý User FULL</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            max-width: 1000px;
+            margin: 20px auto;
+        }
+
+        input, button {
+            padding: 6px;
+            margin: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        tr:nth-child(even) {
+            background: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>Thêm / Sửa User</h2>
+
+<input type="text" id="nameAdd" placeholder="Tên">
+<input type="number" id="yearAdd" placeholder="Năm sinh">
+<input type="text" id="provinceAdd" placeholder="Tỉnh">
+<input type="text" id="cityAdd" placeholder="Thành phố">
+
+<button onclick="addUser()" id="mainBtn">Save</button>
+
+<h3>Quản lý User</h3>
+
+<!-- SEARCH + FILTER -->
+<input type="text" id="search" placeholder="Tìm kiếm..." oninput="applyAll()">
+<input type="number" id="year" placeholder="Năm sinh" oninput="applyAll()">
+<input type="text" id="province" placeholder="Tỉnh" oninput="applyAll()">
+<input type="text" id="city" placeholder="Thành phố" oninput="applyAll()">
+
+<button onclick="resetAll()">Reset</button>
+
+<!-- TABLE -->
+<table>
+    <thead>
+    <tr>
+        <th onclick="sortBy('name')">Tên</th>
+        <th onclick="sortBy('birthYear')">Năm sinh</th>
+        <th onclick="sortBy('province')">Tỉnh</th>
+        <th onclick="sortBy('city')">Thành phố</th>
+        <th>Hành động</th>
+    </tr>
+    </thead>
+    <tbody id="userTable"></tbody>
+</table>
+
+<script>
+    let users = [
+        { name: "An", birthYear: 2000, province: "Hà Nội", city: "Ba Đình" },
+        { name: "Bình", birthYear: 1998, province: "TP HCM", city: "Quận 1" },
+        { name: "Chi", birthYear: 2002, province: "Đà Nẵng", city: "Hải Châu" },
+        { name: "Dũng", birthYear: 1995, province: "Hải Phòng", city: "Lê Chân" },
+        { name: "Hà", birthYear: 2001, province: "Cần Thơ", city: "Ninh Kiều" },
+        { name: "Khánh", birthYear: 1999, province: "Huế", city: "Phú Nhuận" },
+        { name: "Linh", birthYear: 2003, province: "Bắc Ninh", city: "Từ Sơn" },
+        { name: "Minh", birthYear: 1997, province: "Quảng Ninh", city: "Hạ Long" },
+        { name: "Ngọc", birthYear: 2000, province: "Nghệ An", city: "Vinh" },
+        { name: "Phúc", birthYear: 1996, province: "Thanh Hóa", city: "Sầm Sơn" }
+    ];
+
+    let currentList = [...users];
+    let sortAsc = true;
+    let editIndex = -1;
+
+    // HIỂN THỊ
+    function render(list = currentList) {
+        const table = document.getElementById("userTable");
+        table.innerHTML = "";
+
+        list.forEach((u) => {
+            const realIndex = users.indexOf(u);
+
+            table.innerHTML += `
+        <tr ${realIndex === editIndex ? 'style="background:#ffe082"' : ''}>
+            <td>${u.name}</td>
+            <td>${u.birthYear}</td>
+            <td>${u.province}</td>
+            <td>${u.city}</td>
+            <td>
+                <button onclick="editUser(${realIndex})">Edit</button>
+                <button onclick="deleteUser(${realIndex})">Xóa</button>
+            </td>
+        </tr>
+        `;
+        });
+
+        updateButton();
+    }
+
+    // SEARCH + FILTER
+    function applyAll() {
+        const search = document.getElementById("search").value.toLowerCase();
+        const year = document.getElementById("year").value;
+        const province = document.getElementById("province").value.toLowerCase();
+        const city = document.getElementById("city").value.toLowerCase();
+
+        currentList = users.filter(u =>
+            (!search || u.name.toLowerCase().includes(search)) &&
+            (!year || u.birthYear == year) &&
+            (!province || u.province.toLowerCase().includes(province)) &&
+            (!city || u.city.toLowerCase().includes(city))
+        );
+
+        render();
+    }
+
+    // SORT
+    function sortBy(key) {
+        currentList.sort((a, b) => {
+            if (a[key] > b[key]) return sortAsc ? 1 : -1;
+            if (a[key] < b[key]) return sortAsc ? -1 : 1;
+            return 0;
+        });
+
+        sortAsc = !sortAsc;
+        render();
+    }
+
+    // ADD / UPDATE
+    function addUser() {
+        const name = document.getElementById("nameAdd").value;
+        const year = document.getElementById("yearAdd").value;
+        const province = document.getElementById("provinceAdd").value;
+        const city = document.getElementById("cityAdd").value;
+
+        if (name && year && province && city) {
+
+            if (editIndex === -1) {
+                users.push({
+                    name,
+                    birthYear: parseInt(year),
+                    province,
+                    city
+                });
+            } else {
+                users[editIndex] = {
+                    name,
+                    birthYear: parseInt(year),
+                    province,
+                    city
+                };
+                editIndex = -1;
+            }
+
+            resetAll();
+        }
+    }
+
+    // EDIT
+    function editUser(index) {
+        const u = users[index];
+
+        document.getElementById("nameAdd").value = u.name;
+        document.getElementById("yearAdd").value = u.birthYear;
+        document.getElementById("provinceAdd").value = u.province;
+        document.getElementById("cityAdd").value = u.city;
+
+        editIndex = index;
+        render();
+    }
+
+    // DELETE
+    function deleteUser(index) {
+        users.splice(index, 1);
+        applyAll();
+    }
+
+    // RESET
+    function resetAll() {
+        document.querySelectorAll("input").forEach(i => i.value = "");
+        currentList = [...users];
+        editIndex = -1;
+        render();
+    }
+
+    // UPDATE BUTTON TEXT
+    function updateButton() {
+        const btn = document.getElementById("mainBtn");
+        btn.innerText = editIndex === -1 ? "Save" : "Update";
+    }
+
+    // LOAD
+    render();
+</script>
+
+</body>
+</html>

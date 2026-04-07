@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Từ điển đơn giản</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            margin-top: 50px;
+        }
+        input {
+            padding: 10px;
+            width: 200px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Từ điển Anh - Việt</h2>
+
+<input type="text" id="word" placeholder="Nhập từ tiếng Anh">
+<button onclick="searchWord()">Tìm</button>
+
+<div id="result"></div>
+
+<script>
+    let english = ["hello", "cat", "dog", "apple", "book"];
+    let vietnamese = ["xin chào", "con mèo", "con chó", "quả táo", "quyển sách"];
+
+    function searchWord() {
+        let input = document.getElementById("word").value.toLowerCase();
+        let index = -1;
+
+        for (let i = 0; i < english.length; i++) {
+            if (english[i] === input) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index !== -1) {
+            document.getElementById("result").innerHTML =
+                "Nghĩa: " + vietnamese[index];
+        } else {
+            document.getElementById("result").innerHTML =
+                "Không tìm thấy";
+        }
+    }
+</script>
+
+</body>
+</html>

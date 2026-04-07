@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Caro vs AI</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            margin-top: 40px;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(5, 60px);
+            gap: 5px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .cell {
+            width: 60px;
+            height: 60px;
+            border: 1px solid #333;
+            font-size: 24px;
+            line-height: 60px;
+            cursor: pointer;
+            background: #fff;
+        }
+        .cell:hover {
+            background: #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Caro 5x5 (Chơi với AI)</h2>
+<p id="status">Bạn (X) đi trước</p>
+
+<div class="board" id="board"></div>
+
+<button onclick="resetGame()">Chơi lại</button>
+
+<script>
+    const size = 5;
+    let board = [];
+    let gameOver = false;
+
+    function init() {
+        board = Array(size).fill().map(() => Array(size).fill(""));
+        const boardDiv = document.getElementById("board");
+        boardDiv.innerHTML = "";
+        gameOver = false;
+
+        for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+                const cell = document.createElement("div");
+                cell.classList.add("cell");
+
+                cell.onclick = () => playerMove(i, j, cell);
+
+                boardDiv.appendChild(cell);
+            }
+        }
+    }
+
+    function playerMove(r, c, cell) {
+        if (board[r][c] !== "" || gameOver) return;
+
+        board[r][c] = "X";
+        cell.textContent = "X";
+
+        if (checkWin(r, c, "X")) {
+            document.getElementById("status").innerText = "Bạn thắng!";
+            gameOver = true;
+            return;
+        }
+
+        aiMove();
+    }
+
+    function aiMove() {
+        let emptyCells = [];
+
+        for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+                if (board[i][j] === "") {
+                    emptyCells.push([i, j]);
+                }
+            }
+        }
+
+        if (emptyCells.length === 0) return;
+
+        let move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        let [r, c] = move;
+
+        board[r][c] = "O";
+
+        let index = r * size + c;
+        document.getElementsByClassName("cell")[index].textContent = "O";
+
+        if (checkWin(r, c, "O")) {
+            document.getElementById("status").innerText = "Máy thắng!";
+            gameOver = true;
+        }
+    }
+
+    function checkDirection(r, c, dr, dc, player) {
+        let count = 1;
+
+        for (let i = 1; i < 3; i++) {
+            let nr = r + dr*i;
+            let nc = c + dc*i;
+            if (nr >= 0 && nr < size && nc >= 0 && nc < size &&
+                board[nr][nc] === player) count++;
+        }
+
+        for (let i = 1; i < 3; i++) {
+            let nr = r - dr*i;
+            let nc = c - dc*i;
+            if (nr >= 0 && nr < size && nc >= 0 && nc < size &&
+                board[nr][nc] === player) count++;
+        }
+
+        return count >= 3;
+    }
+
+    function checkWin(r, c, player) {
+        return (
+            checkDirection(r, c, 0, 1, player) ||
+            checkDirection(r, c, 1, 0, player) ||
+            checkDirection(r, c, 1, 1, player) ||
+            checkDirection(r, c, 1, -1, player)
+        );
+    }
+
+    function resetGame() {
+        document.getElementById("status").innerText = "Bạn (X) đi trước";
+        init();
+    }
+
+    init();
+</script>
+
+</body>
+</html>

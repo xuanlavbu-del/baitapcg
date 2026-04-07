@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Car Game Menu</title>
+    <style>
+        body {
+            text-align: center;
+            background: #111;
+            color: white;
+            font-family: Arial;
+        }
+        canvas {
+            background: #2c3e50;
+            border: 2px solid white;
+            margin-top: 20px;
+        }
+        .menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>🚗 CAR GAME</h2>
+<p>Điểm: <span id="score">0</span></p>
+
+<canvas id="game" width="500" height="500"></canvas>
+
+<!-- MENU -->
+<div class="menu" id="menu">
+    <h1>🚗 CAR GAME</h1>
+    <button onclick="startGame()">Start Game</button>
+</div>
+
+<!-- GAME OVER -->
+<div class="menu" id="gameOverMenu" style="display:none;">
+    <h1>💥 GAME OVER</h1>
+    <p>Điểm: <span id="finalScore"></span></p>
+    <button onclick="restartGame()">Play Again</button>
+</div>
+
+<script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+
+    const carImg = new Image();
+    carImg.src = "car.png";
+
+    let car, obstacles, rewards, score, gameOver, running;
+
+    // init
+    function init() {
+        car = {
+            x: 250,
+            y: 250,
+            width: 40,
+            height: 60,
+            angle: -Math.PI / 2,
+            speed: 2
+        };
+
+        obstacles = [];
+        rewards = [];
+        score = 0;
+        gameOver = false;
+        running = true;
+
+        createMap();
+    }
+
+    // tạo map
+    function createMap() {
+        obstacles = [];
+        rewards = [];
+
+        obstacles.push({x: 20, y: 20, size: 40});
+
+        for (let i = 0; i < 10; i++) {
+            obstacles.push({
+                x: Math.random() * 450,
+                y: Math.random() * 450,
+                size: 30
+            });
+        }
+
+        for (let i = 0; i < 8; i++) {
+            rewards.push({
+                x: Math.random() * 460,
+                y: Math.random() * 460,
+                size: 15
+            });
+        }
+    }
+
+    // vẽ
+    function drawCar() {
+        ctx.save();
+        ctx.translate(car.x, car.y);
+        ctx.rotate(car.angle);
+        ctx.drawImage(carImg, -car.width/2, -car.height/2, car.width, car.height);
+        ctx.restore();
+    }
+
+    function drawObstacles() {
+        ctx.fillStyle = "red";
+        obstacles.forEach(o => ctx.fillRect(o.x, o.y, o.size, o.size));
+    }
+
+    function drawRewards() {
+        ctx.fillStyle = "yellow";
+        rewards.forEach(r => ctx.fillRect(r.x, r.y, r.size, r.size));
+    }
+
+    // di chuyển
+    function moveCar() {
+        car.x += Math.cos(car.angle) * car.speed;
+        car.y += Math.sin(car.angle) * car.speed;
+    }
+
+    // va chạm
+    function checkCollision() {
+        for (let o of obstacles) {
+            if (car.x > o.x &&
+                car.x < o.x + o.size &&
+                car.y > o.y &&
+                car.y < o.y + o.size) {
+                endGame();
+            }
+        }
+
+        rewards = rewards.filter(r => {
+            if (car.x > r.x &&
+                car.x < r.x + r.size &&
+                car.y > r.y &&
+                car.y < r.y + r.size) {
+                score++;
+                document.getElementById("score").innerText = score;
+                return false;
+            }
+            return true;
+        });
+    }
+
+    // game loop
+    function update() {
+        if (!running) return;
+
+        ctx.clearRect(0, 0, 500, 500);
+
+        moveCar();
+        checkCollision();
+
+        drawCar();
+        drawObstacles();
+        drawRewards();
+
+        requestAnimationFrame(update);
+    }
+
+    // điều khiển
+    document.addEventListener("keydown", e => {
+        if (!running) return;
+
+        if (e.key === "ArrowLeft") car.angle -= 0.1;
+        if (e.key === "ArrowRight") car.angle += 0.1;
+        if (e.key === "ArrowDown") car.angle += Math.PI;
+
+        if (e.key === "Control") car.speed = 5;
+    });
+
+    document.addEventListener("keyup", e => {
+        if (e.key === "Control") car.speed = 2;
+    });
+
+    // 🎮 start
+    function startGame() {
+        document.getElementById("menu").style.display = "none";
+        init();
+        update();
+    }
+
+    // 💥 game over
+    function endGame() {
+        running = false;
+        document.getElementById("finalScore").innerText = score;
+        document.getElementById("gameOverMenu").style.display = "flex";
+    }
+
+    // 🔄 restart
+    function restartGame() {
+        document.getElementById("gameOverMenu").style.display = "none";
+        document.getElementById("score").innerText = 0;
+        startGame();
+    }
+</script>
+
+</body>
+</html>
