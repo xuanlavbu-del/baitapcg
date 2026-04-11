@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Mini Agar.io</title>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+        }
+        canvas {
+            display: block;
+            background: radial-gradient(circle, #0f2027, #000);
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+
+<script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const WALL = 10;
+
+    const keys = {};
+    window.addEventListener("keydown", e => keys[e.key] = true);
+    window.addEventListener("keyup", e => keys[e.key] = false);
+
+    // ===== BALL =====
+    class Ball {
+        constructor(x, y, r, isPlayer = false) {
+            this.x = x;
+            this.y = y;
+            this.r = r;
+            this.isPlayer = isPlayer;
+
+            this.dx = (Math.random() - 0.5) * 2;
+            this.dy = (Math.random() - 0.5) * 2;
+
+            this.color = isPlayer ? "#00ffcc" : `hsl(${Math.random()*360},70%,60%)`;
+        }
+
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+        }
+
+        update() {
+            if (this.isPlayer) {
+                let speed = 4 - this.r * 0.05; // càng to càng chậm
+
+                if (keys["w"] || keys["ArrowUp"]) this.y -= speed;
+                if (keys["s"] || keys["ArrowDown"]) this.y += speed;
+                if (keys["a"] || keys["ArrowLeft"]) this.x -= speed;
+                if (keys["d"] || keys["ArrowRight"]) this.x += speed;
+            } else {
+                this.x += this.dx;
+                this.y += this.dy;
+            }
+
+            // va tường
+            if (this.x < WALL) this.x = WALL;
+            if (this.x > canvas.width - WALL) this.x = canvas.width - WALL;
+            if (this.y < WALL) this.y = WALL;
+            if (this.y > canvas.height - WALL) this.y = canvas.height - WALL;
+        }
+    }
+
+    // ===== KHỞI TẠO =====
+    let player = new Ball(200, 200, 20, true);
+    let balls = [];
+
+    // bot
+    for (let i = 0; i < 25; i++) {
+        balls.push(new Ball(
+            Math.random() * canvas.width,
+            Math.random() * canvas.height,
+            10 + Math.random() * 20
+        ));
+    }
+
+    // ===== VA CHẠM =====
+    function checkEat() {
+        balls = balls.filter(b => {
+            const dx = player.x - b.x;
+            const dy = player.y - b.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+
+            if (dist < player.r + b.r) {
+                if (player.r > b.r) {
+                    player.r += b.r * 0.2; // ăn → to lên
+                    return false;
+                } else {
+                    alert("💀 GAME OVER");
+                    location.reload();
+                }
+            }
+            return true;
+        });
+    }
+
+    // ===== DRAW =====
+    function drawScore() {
+        ctx.fillStyle = "#fff";
+        ctx.font = "20px Arial";
+        ctx.fillText("Size: " + Math.floor(player.r), 20, 30);
+    }
+
+    // ===== LOOP =====
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        player.update();
+        player.draw();
+
+        balls.forEach(b => {
+            b.update();
+            b.draw();
+        });
+
+        checkEat();
+        drawScore();
+
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    // resize
+    window.addEventListener("resize", () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
+</script>
+
+</body>
+</html>
