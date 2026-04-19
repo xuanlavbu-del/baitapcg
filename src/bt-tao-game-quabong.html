@@ -75,16 +75,16 @@
         }
     }
 
-    // ===== KHỞI TẠO =====
-    let player = new Ball(200, 200, 20, true);
+    // ===== KHỞI TẠO bóng người chơi =====
+    let player = new Ball(200, 200, 30, true);
     let balls = [];
 
-    // bot
-    for (let i = 0; i < 25; i++) {
+    //khởi tạo bóng khác
+    for (let i = 0; i < 35; i++) {
         balls.push(new Ball(
             Math.random() * canvas.width,
             Math.random() * canvas.height,
-            10 + Math.random() * 20
+            15 + Math.random() * 20
         ));
     }
 

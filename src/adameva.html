@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Adam Eva Level 3</title>
+
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(#87CEEB, #4CAF50);
+            text-align: center;
+            font-family: Arial;
+            color: white;
+        }
+
+        /* GAME */
+        #game {
+            position: relative;
+            width: 900px;
+            height: 500px;
+            margin: 20px auto;
+            background: url('https://picsum.photos/900/500') no-repeat center/cover;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        /* SPRITE */
+        .sprite {
+            position: absolute;
+            bottom: 20px;
+            width: 200px;
+            height: 200px;
+            background-size: cover;
+            transition: transform 0.2s;
+        }
+
+        #adam { left: 50px; }
+        #eva { right: 50px; }
+
+        /* ANIMATION */
+        .eat {
+            animation: eatAnim 0.4s ease;
+        }
+
+        @keyframes eatAnim {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2) rotate(-5deg); }
+            100% { transform: scale(1); }
+        }
+
+        /* APPLE */
+        #apple {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+        }
+
+        /* BAR */
+        #barBox {
+            width: 300px;
+            height: 20px;
+            background: #333;
+            margin: 10px auto;
+            border-radius: 10px;
+        }
+
+        #bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(red, orange);
+        }
+
+        /* BUTTON */
+        button {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 8px;
+            border: none;
+            background: gold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>🍎 Adam & Eva Level 3</h2>
+
+<div id="barBox"><div id="bar"></div></div>
+
+<div id="game">
+    <img id="apple" src="https://cdn-icons-png.flaticon.com/512/415/415733.png">
+
+    <!-- SPRITE (ảnh người thật hơn) -->
+    <div id="adam" class="sprite"></div>
+    <div id="eva" class="sprite"></div>
+</div>
+
+<button onclick="start()">Start</button>
+<button onclick="adamEat()">Adam ăn</button>
+<button onclick="evaEat()">Eva ăn</button>
+<button onclick="auto()">Auto</button>
+
+<script>
+    // ===== SPRITE IMAGES =====
+    const adamIdle = "https://i.imgur.com/8Qf6G6C.png";
+    const adamEatImg = "https://i.imgur.com/4AiXzf8.png";
+
+    const evaIdle = "https://i.imgur.com/1X6dYFq.png";
+    const evaEatImg = "https://i.imgur.com/Z6X6Q9T.png";
+
+    // ===== CLASS =====
+    class Apple {
+        #weight = 10;
+        getWeight(){ return this.#weight; }
+        decrease(){ if(this.#weight>0) this.#weight--; }
+        isEmpty(){ return this.#weight<=0; }
+    }
+
+    class Human {
+        constructor(name, el, idle, eat){
+            this.name = name;
+            this.weight = 60;
+            this.el = document.getElementById(el);
+            this.idle = idle;
+            this.eatImg = eat;
+
+            this.el.style.backgroundImage = `url(${idle})`;
+        }
+
+        eat(apple){
+            if(!apple.isEmpty()){
+                apple.decrease();
+                this.weight++;
+
+                // animation + đổi ảnh
+                this.el.classList.add("eat");
+                this.el.style.backgroundImage = `url(${this.eatImg})`;
+
+                setTimeout(()=>{
+                    this.el.classList.remove("eat");
+                    this.el.style.backgroundImage = `url(${this.idle})`;
+                },300);
+
+                updateBar();
+            }
+        }
+    }
+
+    // ===== GAME =====
+    let apple, adam, eva, turn=0, interval;
+
+    function updateBar(){
+        document.getElementById("bar").style.width =
+            (apple.getWeight()*10)+"%";
+    }
+
+    function start(){
+        apple = new Apple();
+
+        adam = new Human("Adam","adam",adamIdle,adamEatImg);
+        eva = new Human("Eva","eva",evaIdle,evaEatImg);
+
+        updateBar();
+    }
+
+    function adamEat(){ if(apple) adam.eat(apple); }
+    function evaEat(){ if(apple) eva.eat(apple); }
+
+    function auto(){
+        interval = setInterval(()=>{
+            if(apple.isEmpty()){
+                clearInterval(interval);
+                return;
+            }
+
+            if(turn%2===0) adam.eat(apple);
+            else eva.eat(apple);
+
+            turn++;
+        },700);
+    }
+</script>
+
+</body>
+</html>

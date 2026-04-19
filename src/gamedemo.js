@@ -52,6 +52,7 @@ class Ball {
         this.moveX = moveX;
         this.moveY = moveY;
         this.color = color;
+        this.mass = radius; // hoặc radius^2
     }
 
     move() {
@@ -88,7 +89,7 @@ class Ball {
 
 
 function randomColor() {
-    return `hsl(${Math.random() * 360}, 100%, 50%)`;
+    return `hsl(${Math.random() * 360}, 70%, 50%)`;
 }
 
 
@@ -106,6 +107,8 @@ function createRandomBall(minSpeed, maxSpeed) {
 }
 
 let balls = [];
+
+
 
 // tạo 20 bóng
 for (let i = 0; i < 20;i++) {
@@ -130,32 +133,50 @@ function start() {
     requestAnimationFrame(start);
 }
  // hàm va chạm
-function handleCollision(ball1, ball2) {
-    let dx = ball2.x - ball1.x;
-    let dy = ball2.y - ball1.y;
+function handleCollision(b1, b2) {
+    let dx = b2.x - b1.x;
+    let dy = b2.y - b1.y;
     let distance = Math.sqrt(dx * dx + dy * dy);
 
-    if (distance < ball1.radius + ball2.radius) {
+    if (distance < b1.radius + b2.radius) {
 
-        // đổi vận tốc (simple physics)
-        let tempX = ball1.moveX;
-        let tempY = ball1.moveY;
+        // vector pháp tuyến (normal)
+        let nx = dx / distance;
+        let ny = dy / distance;
 
-        ball1.moveX = ball2.moveX;
-        ball1.moveY = ball2.moveY;
+        // vector tiếp tuyến
+        let tx = -ny;
+        let ty = nx;
 
-        ball2.moveX = tempX;
-        ball2.moveY = tempY;
+        // chiếu vận tốc lên trục pháp tuyến và tiếp tuyến
+        let v1n = b1.moveX * nx + b1.moveY * ny;
+        let v1t = b1.moveX * tx + b1.moveY * ty;
 
-        // đẩy bóng ra khỏi nhau (tránh dính)
-        let overlap = ball1.radius + ball2.radius - distance;
-        let angle = Math.atan2(dy, dx);
+        let v2n = b2.moveX * nx + b2.moveY * ny;
+        let v2t = b2.moveX * tx + b2.moveY * ty;
 
-        ball1.x -= Math.cos(angle) * overlap / 2;
-        ball1.y -= Math.sin(angle) * overlap / 2;
+        // giả sử khác khối lượng → đổi v1n và v2n
 
-        ball2.x += Math.cos(angle) * overlap / 2;
-        ball2.y += Math.sin(angle) * overlap / 2;
+        let v1nAfter = (v1n * (b1.mass - b2.mass) + 2 * b2.mass * v2n) / (b1.mass + b2.mass);
+        let v2nAfter = (v2n * (b2.mass - b1.mass) + 2 * b1.mass * v1n) / (b1.mass + b2.mass);
+
+        // chuyển lại về vector x,y
+        b1.moveX = v1nAfter * nx + v1t * tx;
+        b1.moveY = v1nAfter * ny + v1t * ty;
+
+        b2.moveX = v2nAfter * nx + v2t * tx;
+        b2.moveY = v2nAfter * ny + v2t * ty;
+
+        // ===== FIX DÍNH (rất quan trọng) =====
+        let overlap = b1.radius + b2.radius - distance;
+        b1.x -= nx * overlap / 2;
+        b1.y -= ny * overlap / 2;
+        b2.x += nx * overlap / 2;
+        b2.y += ny * overlap / 2;
     }
 }
+
+
+
+
 start();

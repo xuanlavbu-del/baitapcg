@@ -7,21 +7,21 @@
         body {
             font-family: Arial;
             text-align: center;
-            margin-top: 40px;
+            margin-top: 20px;
         }
         .board {
             display: grid;
-            grid-template-columns: repeat(5, 60px);
+            grid-template-columns: repeat(10, 50px);
             gap: 5px;
             justify-content: center;
             margin-top: 20px;
         }
         .cell {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border: 1px solid #333;
             font-size: 24px;
-            line-height: 60px;
+            line-height: 50px;
             cursor: pointer;
             background: #fff;
         }
@@ -32,7 +32,8 @@
 </head>
 <body>
 
-<h2>Caro 5x5 (Chơi với AI)</h2>
+<h2>Caro 10x10 (Chơi với AI)</h2>
+
 <p id="status">Bạn (X) đi trước</p>
 
 <div class="board" id="board"></div>
@@ -40,7 +41,7 @@
 <button onclick="resetGame()">Chơi lại</button>
 
 <script>
-    const size = 5;
+    const size = 10;
     let board = [];
     let gameOver = false;
 
@@ -107,21 +108,21 @@
     function checkDirection(r, c, dr, dc, player) {
         let count = 1;
 
-        for (let i = 1; i < 3; i++) {
+        for (let i = 1; i < 5; i++) {
             let nr = r + dr*i;
             let nc = c + dc*i;
             if (nr >= 0 && nr < size && nc >= 0 && nc < size &&
                 board[nr][nc] === player) count++;
         }
 
-        for (let i = 1; i < 3; i++) {
+        for (let i = 1; i < 5; i++) {
             let nr = r - dr*i;
             let nc = c - dc*i;
             if (nr >= 0 && nr < size && nc >= 0 && nc < size &&
                 board[nr][nc] === player) count++;
         }
 
-        return count >= 3;
+        return count >= 5;
     }
 
     function checkWin(r, c, player) {
