@@ -7,6 +7,7 @@ frame.width = window.innerWidth;
 frame.height = window.innerHeight;
 frame.style.backgroundColor = 'skyblue';
 
+
 let beginX = 40;
 let beginY = 40;
 
@@ -33,6 +34,7 @@ let moveY = 1;
 // }
 //
 // draw();
+
 let FULL_CIRCLE = 2 * Math.PI;
 // ================= RANDOM =================
 function random(min, max) {
@@ -43,6 +45,7 @@ function randomSpeed(min, max) {
     let speed = random(min, max);
     return Math.random() < 0.5 ? speed : -speed;
 }
+
 
 class Ball {
     constructor(x, y, radius, moveX, moveY, color) {
@@ -74,28 +77,56 @@ class Ball {
         }
 
     }
-
     draw() {
         drawTool.beginPath();
+        drawTool.fillStyle = this.color; // đặt trước
         drawTool.arc(this.x, this.y, this.radius, 0, FULL_CIRCLE);
         drawTool.fill();
 
-        drawTool.fillStyle = this.color;
-
         drawTool.strokeStyle = 'black';
+        drawTool.stroke();
         drawTool.closePath();
     }
-}
 
+}
+function resetGame() {
+    balls = [];
+    for (let i = 0; i < 20; i++) {
+        balls.push(createRandomBall(2, 6));
+    }
+
+    player.x = frame.width / 2;
+    player.y = frame.height / 2;
+    player.radius = 50;
+}
+function handleEat(player, ball, index) {
+    let dx = ball.x - player.x;
+    let dy = ball.y - player.y;
+    let distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance < player.radius + ball.radius) {
+        if (player.radius > ball.radius) {
+            // ăn bóng nhỏ
+            player.radius += ball.radius * 0.2;
+            balls.splice(index, 1);
+        } else {
+            // thua
+            alert("GAME OVER!");
+            resetGame();
+        }
+    }
+}
 
 function randomColor() {
     return `hsl(${Math.random() * 360}, 70%, 50%)`;
 }
 
 
+
+
 // ================= TẠO BÓNG RANDOM =================
 function createRandomBall(minSpeed, maxSpeed) {
-    let radius = random(20, 40);
+    let radius = random(20, 55);
 
     let x = random(radius, frame.width - radius);
     let y = random(radius, frame.height - radius);
@@ -108,17 +139,46 @@ function createRandomBall(minSpeed, maxSpeed) {
 
 let balls = [];
 
+//tạo bóng người chơi
 
+let player = new Ball(
+    frame.width / 2,
+    frame.height / 2,
+    35,
+    0,
+    0,
+    'black'
+);
 
 // tạo 20 bóng
-for (let i = 0; i < 20;i++) {
+for (let i = 0; i < 25;i++) {
     balls.push(createRandomBall(2, 6));
+}
+
+const keys = {};
+window.addEventListener("keydown", e => keys[e.key] = true);
+window.addEventListener("keyup", e => keys[e.key] = false);
+
+function movePlayer() {
+    let speed = 4;
+
+    if (keys['ArrowUp']) player.y -= speed;
+    if (keys['ArrowDown']) player.y += speed;
+    if (keys['ArrowLeft']) player.x -= speed;
+    if (keys['ArrowRight']) player.x += speed;
+
+    // không cho ra ngoài màn hình
+    player.x = Math.max(player.radius, Math.min(frame.width - player.radius, player.x));
+    player.y = Math.max(player.radius, Math.min(frame.height - player.radius, player.y));
 }
 
 // ================= LOOP =================
 
 function start() {
     drawTool.clearRect(0, 0, frame.width, frame.height);
+
+    movePlayer(); // di chuyển player
+    player.draw();  // ✅ vẽ player
 
     // di chuyển
     balls.forEach(ball => ball.move());
@@ -129,10 +189,23 @@ function start() {
             handleCollision(balls[i], balls[j]);
         }
     }
+    // kiểm tra player ăn bóng
+    for (let i = balls.length - 1; i >= 0; i--) {
+        handleEat(player, balls[i], i);
+    }
 
+
+    // 🏆 THẮNG
+    if (balls.length === 0) {
+        alert("YOU WIN 🎉");
+        location.reload();
+        return;
+    }
     requestAnimationFrame(start);
 }
- // hàm va chạm
+
+
+// hàm va chạm
 function handleCollision(b1, b2) {
     let dx = b2.x - b1.x;
     let dy = b2.y - b1.y;
@@ -175,7 +248,6 @@ function handleCollision(b1, b2) {
         b2.y += ny * overlap / 2;
     }
 }
-
 
 
 
